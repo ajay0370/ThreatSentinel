@@ -1,0 +1,10 @@
+Flask==3.0.3
+Flask-CORS==5.0.0
+python-dotenv==1.0.1
+scapy==2.5.0
+scikit-learn==1.4.2
+joblib==1.4.2
+pandas==2.2.2
+numpy==1.26.4
+reportlab==4.2.0
+google-generativeai==0.5.4

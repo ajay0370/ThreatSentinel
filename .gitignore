@@ -1,0 +1,27 @@
+# Python files
+__pycache__/
+*.py[cod]
+*$py.class
+*.venv
+venv/
+ENV/
+env/
+
+# Databases & logs
+*.db
+*.log
+
+# Scikit-learn models
+*.pkl
+models/scaler.pkl
+models/isolation_forest.pkl
+models/random_forest.pkl
+
+# Node.js
+node_modules/
+dist/
+.env
+
+# Local PCAPs & reports
+*.pcap
+*.pdf

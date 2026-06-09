@@ -1,0 +1,85 @@
+{
+    "dataset_mode": "synthetic",
+    "sample_counts": {
+        "total": 4000,
+        "train": 3200,
+        "test": 800
+    },
+    "random_forest": {
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "confusion_matrix": [
+            [
+                480,
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                115,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                125,
+                0
+            ],
+            [
+                0,
+                0,
+                0,
+                80
+            ]
+        ],
+        "class_reports": {
+            "Normal": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 480.0
+            },
+            "DDoS": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 115.0
+            },
+            "Port Scan": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 125.0
+            },
+            "Brute Force": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 80.0
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 800.0
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 800.0
+            }
+        }
+    },
+    "isolation_forest": {
+        "accuracy": 0.95875,
+        "precision": 0.9208211143695014,
+        "recall": 0.98125,
+        "f1_score": 0.9500756429652042
+    }
+}

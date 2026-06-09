@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Color Palette - Cybersecurity SOC Dark Theme */
+  --bg-main: #0A0E1A;
+  --bg-sidebar: rgba(13, 20, 33, 0.85);
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --bg-card-hover: rgba(31, 41, 55, 0.85);
+  --border-light: rgba(255, 255, 255, 0.06);
+  
+  --text-primary: #F9FAFB;
+  --text-secondary: #9CA3AF;
+  --text-muted: #6B7280;
+  
+  /* Accent Color System */
+  --accent-primary: #00D4AA;    /* SOC Teal */
+  --accent-secondary: #3B82F6;  /* Info Blue */
+  
+  /* Severity Colors */
+  --color-critical: #EF4444;    /* Critical Red */
+  --color-high: #F59E0B;        /* High Orange/Yellow */
+  --color-medium: #3B82F6;      /* Medium Blue */
+  --color-low: #6B7280;         /* Low Gray */
+  --color-normal: #10B981;      /* Normal Emerald */
+  
+  /* Glow shadows */
+  --glow-critical: rgba(239, 68, 68, 0.4);
+  --glow-high: rgba(245, 158, 11, 0.3);
+  --glow-teal: rgba(0, 212, 170, 0.3);
+  
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  /* Premium Ambient Radial Glows + Faint Tactical Scanning Grid Overlay */
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(0, 212, 170, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 10% 30%, rgba(59, 130, 246, 0.05) 0%, transparent 35%),
+    radial-gradient(circle at 90% 75%, rgba(239, 68, 68, 0.02) 0%, transparent 40%),
+    linear-gradient(rgba(255, 255, 255, 0.003) 1px, transparent 1px), 
+    linear-gradient(90deg, rgba(255, 255, 255, 0.003) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  font-family: var(--font-sans);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism / Dark panels - Upgraded to Translucent backdrop-filter */
+.glass-panel {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light) !important;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+  transition: all var(--transition-normal);
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.custom-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-normal) forwards;
+}
+
+/* System Pulse Dot */
+@keyframes pulse-dot {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 212, 170, 0.6);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 6px rgba(0, 212, 170, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 212, 170, 0);
+  }
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background-color: var(--accent-primary);
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse-dot 2s infinite;
+}
+
+/* Critical Metric Card Pulse */
+@keyframes pulse-critical-card {
+  0%, 100% {
+    border-left-color: var(--color-critical);
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4), 0 0 4px rgba(239, 68, 68, 0.2);
+  }
+  50% {
+    border-left-color: #ff6b6b;
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.4), 0 0 14px rgba(239, 68, 68, 0.5);
+  }
+}
+
+.pulse-critical-card {
+  animation: pulse-critical-card 2s infinite ease-in-out !important;
+}
+
+/* Threat Ticker Marquee Animation */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 10px 16px;
+  margin-top: 10px;
+  margin-bottom: 24px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.ticker-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 30s linear infinite;
+  padding-left: 20px;
+}
+
+.ticker-item {
+  display: inline-block;
+  margin-right: 40px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: monospace;
+}
+
+/* Recharts overrides to fit custom dark theme */
+.recharts-default-tooltip {
+  background-color: var(--bg-card) !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(8px);
+}
+
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: #1F2937 !important;
+}
+
+.recharts-text {
+  fill: var(--text-muted) !important;
+  font-size: 11px;
+}
+
+/* Spin animation for spinner icons */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* SOC Tables Styling */
+.soc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.soc-table th {
+  text-align: left;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.soc-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.soc-table tr {
+  transition: all var(--transition-fast);
+}
+
+.soc-table tr:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+.soc-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Dropdown Option Elements Dark Theme Fix */
+select option {
+  background-color: #111827 !important;
+  color: #F9FAFB !important;
+}
+

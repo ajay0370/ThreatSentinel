@@ -368,5 +368,6 @@ def sqlite_check_session(session_id):
     return dict(row) if row else None
 
 if __name__ == '__main__':
-    print("[*] Starting ThreatSentinel Lite Flask API on port 5000...")
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"[*] Starting ThreatSentinel Lite Flask API on port {port}...")
+    app.run(host='0.0.0.0', port=port, debug=False)

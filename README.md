@@ -1,4 +1,6 @@
 # 🛡️ ThreatSentinel Lite
+### AI-Powered Zero-Day Threat Detection System
+*4th-Year Computer Science Capstone Project*
 
 > **AI-powered network threat detection and analytics platform combining machine learning anomaly detection with LLM-generated threat explanations for SOC analysts.**
 
@@ -6,30 +8,20 @@ Traditional signature-based intrusion detection systems struggle to detect novel
 
 ---
 
-## 🚀 Features
+## 🌟 Key Features
 
-- **Dual-model detection**
-  - Isolation Forest for anomaly and zero-day detection
-  - Random Forest for known attack classification
-
-- **MITRE ATT&CK Mapping**
-  - Maps detections to standardized MITRE ATT&CK technique IDs for SOC-friendly analysis.
-
-- **Real-time Alerting**
-  - Server-Sent Events (SSE) stream alerts to the dashboard without polling.
-
-- **LLM Threat Co-pilot**
-  - Gemini-powered explanations describing why network flows were flagged.
-
-- **Executive Summary Generation**
-  - Automatically generates AI-written PDF reports for non-technical stakeholders.
-
-- **SOC-style Dashboard**
-  - Dark-themed React interface with charts and alert history visualizations.
+* **Dual-Model Detection Engine:**
+  * **Isolation Forest (Unsupervised Anomaly Detector):** Learns standard network baseline communication and flags high-anomaly outliers as Zero-Day anomalies (95.88% accuracy).
+  * **Random Forest Classifier (Supervised Multi-Class):** Classifies known attack vectors including **DDoS**, **Port Scans**, and **Brute Force** attempts (100% accuracy).
+* **MITRE ATT&CK Mapping:** Maps all flagged threats to standardized MITRE ATT&CK technique/tactic IDs and recommendations for SOC-friendly analysis.
+* **Real-Time SOC Dashboard:** Streams threat alerts row-by-row onto a sleek dark-themed browser dashboard via Server-Sent Events (SSE).
+* **Gemini AI Incident Co-Pilot:** A chat widget loaded with active session context enables analysts to investigate IP behaviors, request mitigation plans, and discuss threat profiles.
+* **Local Expert Heuristics Fallback:** Automatically switches to rule-based heuristics if the Gemini API Key is missing or offline, ensuring robust operation.
+* **Executive Summary PDF Generation:** Automatically generates custom-compiled ReportLab PDF reports containing AI executive summaries, charts, top alerts, and MITRE recommendations.
 
 ---
 
-# 🏗️ Architecture
+## 🏗️ System Architecture
 
 ```text
 PCAP / Network Flow Data
@@ -39,7 +31,7 @@ Scapy Feature Extraction
         │
         ▼
 ┌─────────────────────┐
-│  Isolation Forest   │ → Anomaly Detection
+│  Isolation Forest   │ → Anomaly Detection (Zero-Day mapping)
 │  Random Forest      │ → Attack Classification
 └─────────────────────┘
         │
@@ -47,7 +39,7 @@ Scapy Feature Extraction
 MITRE ATT&CK Mapping
         │
         ▼
-Flask REST API + SSE
+Flask REST API + SSE (SQLite threats.db)
         │
         ▼
 ┌─────────────────────┬────────────────────────┐
@@ -58,201 +50,220 @@ Flask REST API + SSE
 
 ---
 
-# 📊 Model Performance
-
-Evaluated on the **CIC-IDS2017** dataset.
-
-## Isolation Forest (Binary Anomaly Detection)
-
-| Metric | Score |
-|----------|------:|
-| Accuracy | 95.88% |
-| Precision | 92.08% |
-| Recall | 98.13% |
-| F1-Score | 95.01% |
-
-## Random Forest (Multi-Class Classification)
-
-| Metric | Score |
-|----------|------:|
-| Accuracy | 100%* |
-| Precision | 100%* |
-| Recall | 100%* |
-| F1-Score | 100%* |
-
-> **Note:** These results were obtained on an 800-sample stratified test split. Such high performance warrants scrutiny for potential data leakage (e.g., flow-level near duplicates or feature leakage). Further validation on larger, time-separated hold-out datasets is in progress. These numbers should be considered preliminary rather than production-validated.
-
-### Confusion Matrix
+## 📂 Project Directory Structure
 
 ```text
-              Predicted
-              Normal  DDoS  PortScan  BruteForce
-Normal         480      0      0          0
-DDoS             0    115      0          0
-Port Scan        0      0    125          0
-Brute Force      0      0      0         80
-```
-
----
-
-# 🛠️ Tech Stack
-
-### Machine Learning
-- Python
-- Scikit-learn
-- Pandas
-- Scapy
-
-### Backend
-- Flask
-- SQLite
-- Server-Sent Events (SSE)
-
-### Frontend
-- React.js
-- Recharts
-
-### AI / LLM
-- Google Gemini API
-
-### Reporting
-- ReportLab
-
-### Dataset
-- CIC-IDS2017
-
-### Deployment
-- Render
-
----
-
-# ⚙️ Installation
-
-## Prerequisites
-
-- Python 3.x
-- Node.js and npm
-- Google Gemini API key
-
----
-
-## Backend Setup
-
-```bash
-git clone https://github.com/YOUR_USERNAME/ThreatSentinel-Lite.git
-
-cd ThreatSentinel-Lite/backend
-
-python -m venv venv
-
-# Linux / macOS
-source venv/bin/activate
-
-# Windows
-venv\Scripts\activate
-
-pip install -r requirements.txt
-
-# Create environment file
-cp .env.example .env
-
-# Add your GEMINI_API_KEY and configuration
-
-python app.py
-```
-
----
-
-## Frontend Setup
-
-```bash
-cd ../frontend
-
-npm install
-
-npm start
-```
-
----
-
-## Running the Application
-
-Frontend:
-
-```text
-http://localhost:3000
-```
-
-Backend API:
-
-```text
-http://localhost:5000
-```
-
----
-
-# 📂 Project Structure
-
-```text
-ThreatSentinel-Lite/
-│
+ThreatSentinel/
+├── ml_engine/
+│   ├── models/
+│   │   ├── scaler.pkl              # Standardized feature scaling model
+│   │   ├── isolation_forest.pkl    # Outlier detection model (Zero-Day mapping)
+│   │   ├── random_forest.pkl       # Labeled threat classifier
+│   │   └── evaluation.json         # Performance metrics (Precision, Recall)
+│   ├── data_generator.py           # Synthetic flow generator & Scapy PCAP compiler
+│   ├── train.py                    # Model trainer (supports --mode flags)
+│   └── pipeline.py                 # PCAP flow extractor & prediction pipeline
 ├── backend/
-│   ├── app.py
-│   ├── api/                # Flask routes
-│   ├── models/             # Trained model files
-│   └── requirements.txt
-│
+│   ├── app.py                      # Flask Server (REST endpoints + CORS + SSE)
+│   ├── database.py                 # SQLite database setup & queries (threats.db)
+│   ├── mitre.py                    # MITRE ATT&CK technique mapper
+│   ├── report.py                   # ReportLab PDF compiler
+│   ├── gemini.py                   # Gemini LLM integration + expert fallback
+│   └── requirements.txt            # Backend python dependencies (pinned)
 ├── frontend/
 │   ├── src/
 │   │   ├── components/
-│   │   └── App.js
-│   └── package.json
-│
-├── data/                   # Dataset and preprocessing scripts
-│
-└── README.md
+│   │   │   ├── Sidebar.jsx         # Sidebar tab and session history lists
+│   │   │   ├── Dashboard.jsx       # Chart panels and stats overview cards
+│   │   │   ├── UploadZone.jsx      # Drag-and-drop file upload with progress
+│   │   │   ├── AlertList.jsx       # Dynamic searchable threats logs table
+│   │   │   ├── AlertDetail.jsx     # Flow details drawer & MITRE mitigations
+│   │   │   ├── ThreatIntel.jsx     # Aggregated database stats & top 15 historical threats
+│   │   │   └── CoPilotChat.jsx     # Conversational co-pilot interface
+│   │   ├── App.jsx                 # Global state controller & SSE connection
+│   │   ├── main.jsx                # Vite mounting script
+│   │   └── index.css               # Dark theme variables & animations
+│   ├── package.json                # Frontend NPM packages
+│   └── vite.config.js              # Vite configuration
+├── runtime.txt                     # Force Python 3.11.9 for Render Deployment
+├── requirements.txt                # Root copy of backend dependencies
+└── setup.sh                        # One-command developer environment installer
 ```
 
 ---
 
-# 🚀 Usage
+## 📈 ML Engine Feature Engineering & Performance
 
-1. Start the backend and frontend.
-2. Upload a PCAP file or connect a live traffic source.
-3. Monitor real-time detections on the dashboard.
-4. Click an alert to view a Gemini-generated explanation.
-5. Export executive summaries as PDF reports.
+The pipeline aggregates packet headers and payloads into bidirectional flows grouped by:
+`tuple(sorted([(src_ip, src_port), (dst_ip, dst_port)])) + (protocol,)`
+
+### Extracted Features (12 dimensions):
+1. `duration` (flow length in seconds)
+2. `pkt_count_out` (packets sent)
+3. `pkt_count_in` (packets received)
+4. `byte_count_out` (bytes sent)
+5. `byte_count_in` (bytes received)
+6. `pkt_rate` (packets per second)
+7. `byte_rate` (bytes per second)
+8. `avg_pkt_sz` (average packet size in bytes)
+9. `tcp_flags_syn` (count of SYN flags)
+10. `tcp_flags_ack` (count of ACK flags)
+11. `tcp_flags_rst` (count of RST flags)
+12. `protocol` (IP protocol number, e.g. TCP=6, UDP=17)
+
+### Model Evaluation (CIC-IDS2017 Dataset Split):
+
+#### 1. Isolation Forest (Binary Anomaly Detection)
+* **Accuracy:** `95.88%`
+* **Precision:** `92.08%`
+* **Recall:** `98.13%`
+* **F1-Score:** `95.01%`
+
+#### 2. Random Forest (Multi-Class Classification)
+* **Accuracy:** `100.00%`
+* **Precision:** `100.00%`
+* **Recall:** `100.00%`
+* **F1-Score:** `100.00%`
+
+*Note: These results were obtained on an 800-sample stratified test split. Such high performance warrants scrutiny for potential data leakage (e.g. flow-level near duplicates or feature leakage). Further validation on larger, time-separated hold-out datasets is in progress.*
+
+#### Confusion Matrix:
+```text
+               Predicted:
+               Normal   DDoS   PortScan   BruteForce
+  Normal         480      0        0          0
+  DDoS             0    115        0          0
+  Port Scan        0      0      125          0
+  Brute Force      0      0        0         80
+```
 
 ---
 
-# 🔮 Future Improvements
+## 🛠️ Tech Stack
+
+* **Machine Learning:** Python, Scikit-learn, Pandas, Scapy, Joblib
+* **Backend API:** Flask, SQLite (sqlite3), Server-Sent Events (SSE)
+* **Frontend UI:** React.js, Recharts, Lucide-React
+* **AI/LLM:** Google Gemini API (gemini-1.5-flash model)
+* **Reporting:** ReportLab PDF Library
+
+---
+
+## 🏁 Local Installation & Launch
+
+### Prerequisites
+* Python 3.11
+* Node.js (v18+) and NPM
+* Google Gemini API Key (optional)
+
+### Setup & Run Commands
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/ajay0370/ThreatSentinel.git
+   cd ThreatSentinel
+   ```
+
+2. **Configure Environment Variables:**
+   Create a `.env` file in the root workspace folder:
+   ```ini
+   FLASK_APP=backend/app.py
+   FLASK_ENV=development
+   PORT=5000
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+
+3. **Install Dependencies (Automatic):**
+   ```bash
+   chmod +x setup.sh
+   ./setup.sh
+   ```
+   *For Windows (PowerShell):*
+   ```powershell
+   python -m venv venv
+   .\venv\Scripts\activate
+   pip install -r backend/requirements.txt
+   cd frontend
+   npm install
+   cd ..
+   ```
+
+4. **Compile Test PCAP (Optional):**
+   Generate the synthetic datasets and PCAPs:
+   ```bash
+   python ml_engine/data_generator.py
+   python ml_engine/train.py --mode synthetic
+   ```
+
+5. **Run the Backend API Server:**
+   ```bash
+   python backend/app.py
+   ```
+   *Backend listens on:* `http://localhost:5000`
+
+6. **Run the React SOC Dashboard:**
+   Open a separate terminal:
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+   *Interface listens on:* `http://localhost:5173`
+
+---
+
+## ☁️ Deployment Guide (Render)
+
+Render hosts the Flask python backend. Follow these instructions to deploy it successfully:
+
+### Step 1: Push Project to GitHub
+Commit all local changes (including `runtime.txt` and `requirements.txt` configs) and push them to your repository on GitHub.
+
+### Step 2: Configure Render Settings
+1. Go to your [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** and select **Web Service**.
+3. Connect your GitHub repository.
+4. Set the following parameters:
+   * **Name:** `ThreatSentinel-Backend`
+   * **Region:** `Oregon (US West)` (or closest matching region)
+   * **Branch:** `main`
+   * **Runtime:** `Python`
+
+5. Configure **Root Directory** and **Commands**:
+
+   * **If your "Root Directory" is set to `backend` (Recommended):**
+     * **Build Command:** `pip install -r requirements.txt`
+     * **Start Command:** `gunicorn --bind 0.0.0.0:$PORT app:app`
+
+   * **If your "Root Directory" is empty or `/` (Repository Root):**
+     * **Build Command:** `pip install -r requirements.txt`
+     * **Start Command:** `gunicorn --bind 0.0.0.0:$PORT backend.app:app`
+
+### Step 3: Add Environment Variables
+1. Scroll down to the **Environment** section.
+2. Click **Add Environment Variable** and enter:
+   * **Key:** `GEMINI_API_KEY`
+   * **Value:** *(Paste your Google Gemini API Key)*
+3. Add a second environment variable:
+   * **Key:** `PYTHON_VERSION`
+   * **Value:** `3.11.9`
+
+### Step 4: Deploy Service
+1. Click **Create Web Service** at the bottom of the page.
+2. Wait for the build logs to install dependencies. Render will automatically read `runtime.txt`, install Python 3.11.9, download the precompiled binary wheels, and boot up gunicorn.
+
+---
+
+## 🔮 Future Improvements
 
 - [ ] Validate model performance on larger, time-separated datasets.
 - [ ] Add live packet capture support.
-- [ ] Expand attack classes beyond:
-  - DDoS
-  - Port Scan
-  - Brute Force
 - [ ] Implement user authentication for multi-analyst SOC environments.
 - [ ] Add role-based access control (RBAC).
 - [ ] Containerize services using Docker.
-- [ ] Deploy with CI/CD pipelines.
 
 ---
 
-# 📜 License
+## 📜 License & Acknowledgement
 
-This project is licensed under the **MIT License**.
-
----
-
-## ⭐ Acknowledgements
-
-- **CIC-IDS2017** dataset
-- **Google Gemini API**
-- **Scikit-learn**
-- **Flask**
-- **React**
-- **MITRE ATT&CK Framework**
-
----
+* This project is licensed under the **MIT License**.
+* Dataset derived from the **CIC-IDS2017** dataset.

@@ -1,4 +1,3 @@
-# MITRE ATT&CK Mapping Module for ThreatSentinel Lite
 
 MITRE_MAP = {
     "DDoS": {

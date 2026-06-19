@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Award, Layers, TrendingUp, RefreshCw, AlertTriangle, Eye } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function ThreatIntel({ onSelectAlert, activeAlertId, onUpdateStatus }) {
   const [intelStats, setIntelStats] = useState(null);
@@ -10,7 +11,7 @@ export default function ThreatIntel({ onSelectAlert, activeAlertId, onUpdateStat
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('http://localhost:5000/api/stats/historical');
+      const response = await fetch(`${API_BASE_URL}/api/stats/historical`);
       if (!response.ok) {
         throw new Error('Failed to retrieve historical threat metrics');
       }

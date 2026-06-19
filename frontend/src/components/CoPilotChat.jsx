@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Sparkles, Loader2, Bot, User, Trash2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function CoPilotChat({ activeSessionId, sessions }) {
   const [messages, setMessages] = useState([
@@ -37,7 +38,7 @@ export default function CoPilotChat({ activeSessionId, sessions }) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/chat', {
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

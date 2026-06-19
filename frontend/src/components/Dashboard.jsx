@@ -1,6 +1,7 @@
 import React from 'react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Shield, ShieldAlert, Activity, FileDown, RefreshCw, AlertCircle, Volume2 } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function Dashboard({ stats, alerts = [], activeSession, onRefresh, sessions, activeSessionId, handleSessionChange }) {
   const hasData = stats && stats.total_alerts > 0;
@@ -22,7 +23,7 @@ export default function Dashboard({ stats, alerts = [], activeSession, onRefresh
 
   const handleDownloadReport = () => {
     if (!activeSessionId) return;
-    window.location.href = `http://localhost:5000/api/report/generate?session_id=${activeSessionId}`;
+    window.location.href = `${API_BASE_URL}/api/report/generate?session_id=${activeSessionId}`;
   };
 
   const getSeverityColor = (severity) => {

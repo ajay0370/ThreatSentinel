@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Upload, File, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function UploadZone({ onUploadSuccess }) {
   const [dragOver, setDragOver] = useState(false);
@@ -62,7 +63,7 @@ export default function UploadZone({ onUploadSuccess }) {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:5000/api/upload', {
+      const response = await fetch(`${API_BASE_URL}/api/upload`, {
         method: 'POST',
         body: formData,
       });

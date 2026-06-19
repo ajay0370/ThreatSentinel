@@ -7,6 +7,7 @@ import AlertDetail from './components/AlertDetail';
 import CoPilotChat from './components/CoPilotChat';
 import ThreatIntel from './components/ThreatIntel';
 import { Shield } from 'lucide-react';
+import { API_BASE_URL } from './config';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -40,7 +41,7 @@ export default function App() {
   // 2. Fetch sessions on load and check backend status
   const fetchSessions = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/sessions');
+      const response = await fetch(`${API_BASE_URL}/api/sessions`);
       if (response.ok) {
         const data = await response.json();
         setSessions(data);
@@ -63,7 +64,7 @@ export default function App() {
     await fetchSessions();
     if (activeSessionId) {
       try {
-        const response = await fetch(`http://localhost:5000/api/alerts?session_id=${activeSessionId}`);
+        const response = await fetch(`${API_BASE_URL}/api/alerts?session_id=${activeSessionId}`);
         if (response.ok) {
           const data = await response.json();
           setAlerts(data);
@@ -92,7 +93,7 @@ export default function App() {
     setActiveAlert(null);
 
     console.log(`[*] Connecting to SSE stream for session: ${activeSessionId}`);
-    const eventSource = new EventSource(`http://localhost:5000/api/stream?session_id=${activeSessionId}`);
+    const eventSource = new EventSource(`${API_BASE_URL}/api/stream?session_id=${activeSessionId}`);
 
     eventSource.onmessage = (event) => {
       try {

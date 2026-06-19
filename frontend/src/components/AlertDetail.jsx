@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Sparkles, Loader2, Shield, Info, ShieldAlert } from 'lucide-react';
+import { API_BASE_URL } from '../config';
 
 export default function AlertDetail({ alert, onClose, onUpdateStatus }) {
   const [explanation, setExplanation] = useState('');
@@ -13,7 +14,7 @@ export default function AlertDetail({ alert, onClose, onUpdateStatus }) {
   const fetchAIExplanation = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/explain', {
+      const response = await fetch(`${API_BASE_URL}/api/explain`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,5 @@
 # 🛡️ ThreatSentinel Lite
 ### AI-Powered Zero-Day Threat Detection System
-*4th-Year Computer Science Capstone Project*
 
 > **AI-powered network threat detection and analytics platform combining machine learning anomaly detection with LLM-generated threat explanations for SOC analysts.**
 

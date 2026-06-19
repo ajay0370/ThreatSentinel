@@ -95,7 +95,6 @@ export default function Sidebar({ activeTab, setActiveTab, backendStatus, sessio
             API Endpoint: {backendStatus === 'online' ? 'Connected' : 'Disconnected'}
           </span>
         </div>
-        <span style={styles.copyright}>CSE Capstone Project</span>
       </div>
     </aside>
   );

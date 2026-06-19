@@ -3,7 +3,7 @@ import sys
 import joblib
 import pandas as pd
 import numpy as np
-from scapy.all import rdpcap, IP, IPv6, TCP, UDP
+from scapy.all import PcapReader, IP, IPv6, TCP, UDP
 
 def get_model_path(filename):
     """Finds the model file in multiple potential locations to support execution from root or backend folders."""
@@ -42,93 +42,92 @@ class ThreatPipeline:
 
     def parse_pcap_to_flows(self, pcap_path):
         """Parses a PCAP file and aggregates packet details into bidirectional flows."""
-        print(f"[*] Reading PCAP file '{pcap_path}'...")
+        print(f"[*] Reading and parsing PCAP file '{pcap_path}' in streaming mode...")
+        flows = {}
+        packet_count = 0
         try:
-            packets = rdpcap(pcap_path)
+            with PcapReader(pcap_path) as packets:
+                for i, pkt in enumerate(packets):
+                    packet_count += 1
+                    # 1. Extract IP / IPv6 layer
+                    if pkt.haslayer(IP):
+                        src_ip = pkt[IP].src
+                        dst_ip = pkt[IP].dst
+                        proto = pkt[IP].proto
+                    elif pkt.haslayer(IPv6):
+                        src_ip = pkt[IPv6].src
+                        dst_ip = pkt[IPv6].dst
+                        proto = pkt[IPv6].nh
+                    else:
+                        # Skip non-IP packets for flow analysis
+                        continue
+
+                    # 2. Extract TCP/UDP port info
+                    src_port = 0
+                    dst_port = 0
+                    syn_flag = 0
+                    ack_flag = 0
+                    rst_flag = 0
+
+                    if pkt.haslayer(TCP):
+                        src_port = pkt[TCP].sport
+                        dst_port = pkt[TCP].dport
+                        flags_str = str(pkt[TCP].flags)
+                        syn_flag = 1 if "S" in flags_str else 0
+                        ack_flag = 1 if "A" in flags_str else 0
+                        rst_flag = 1 if "R" in flags_str else 0
+                    elif pkt.haslayer(UDP):
+                        src_port = pkt[UDP].sport
+                        dst_port = pkt[UDP].dport
+
+                    # Skip common DNS or local traffic if it clutter metrics, or analyze all
+                    # Here we analyze all IP traffic.
+                    
+                    # 3. Create Bidirectional Flow Key
+                    # Sort (ip, port) pairs together, not IPs and ports independently.
+                    # Key format: tuple(sorted([(src_ip, src_port), (dst_ip, dst_port)])) + (protocol,)
+                    endpoint_a = (src_ip, src_port)
+                    endpoint_b = (dst_ip, dst_port)
+                    sorted_endpoints = tuple(sorted([endpoint_a, endpoint_b]))
+                    flow_key = sorted_endpoints + (proto,)
+                    
+                    # Packet length / bytes
+                    pkt_len = len(pkt)
+                    pkt_time = float(pkt.time)
+                    
+                    if flow_key not in flows:
+                        flows[flow_key] = {
+                            'start_time': pkt_time,
+                            'end_time': pkt_time,
+                            'initiator': endpoint_a, # The one who sent the first packet
+                            'responder': endpoint_b,
+                            'pkt_count_out': 1,
+                            'pkt_count_in': 0,
+                            'byte_count_out': pkt_len,
+                            'byte_count_in': 0,
+                            'tcp_flags_syn': syn_flag,
+                            'tcp_flags_ack': ack_flag,
+                            'tcp_flags_rst': rst_flag,
+                            'protocol': proto
+                        }
+                    else:
+                        flow = flows[flow_key]
+                        flow['end_time'] = pkt_time
+                        
+                        # Check direction relative to flow initiator
+                        if endpoint_a == flow['initiator']:
+                            flow['pkt_count_out'] += 1
+                            flow['byte_count_out'] += pkt_len
+                        else:
+                            flow['pkt_count_in'] += 1
+                            flow['byte_count_in'] += pkt_len
+                            
+                        flow['tcp_flags_syn'] += syn_flag
+                        flow['tcp_flags_ack'] += ack_flag
+                        flow['tcp_flags_rst'] += rst_flag
         except Exception as e:
             print(f"[-] Error reading PCAP file: {e}")
             return []
-
-        print(f"[*] Parsing {len(packets)} packets...")
-        flows = {}
-        
-        for i, pkt in enumerate(packets):
-            # 1. Extract IP / IPv6 layer
-            if pkt.haslayer(IP):
-                src_ip = pkt[IP].src
-                dst_ip = pkt[IP].dst
-                proto = pkt[IP].proto
-            elif pkt.haslayer(IPv6):
-                src_ip = pkt[IPv6].src
-                dst_ip = pkt[IPv6].dst
-                proto = pkt[IPv6].nh
-            else:
-                # Skip non-IP packets for flow analysis
-                continue
-
-            # 2. Extract TCP/UDP port info
-            src_port = 0
-            dst_port = 0
-            syn_flag = 0
-            ack_flag = 0
-            rst_flag = 0
-
-            if pkt.haslayer(TCP):
-                src_port = pkt[TCP].sport
-                dst_port = pkt[TCP].dport
-                flags_str = str(pkt[TCP].flags)
-                syn_flag = 1 if "S" in flags_str else 0
-                ack_flag = 1 if "A" in flags_str else 0
-                rst_flag = 1 if "R" in flags_str else 0
-            elif pkt.haslayer(UDP):
-                src_port = pkt[UDP].sport
-                dst_port = pkt[UDP].dport
-
-            # Skip common DNS or local traffic if it clutter metrics, or analyze all
-            # Here we analyze all IP traffic.
-            
-            # 3. Create Bidirectional Flow Key
-            # Sort (ip, port) pairs together, not IPs and ports independently.
-            # Key format: tuple(sorted([(src_ip, src_port), (dst_ip, dst_port)])) + (protocol,)
-            endpoint_a = (src_ip, src_port)
-            endpoint_b = (dst_ip, dst_port)
-            sorted_endpoints = tuple(sorted([endpoint_a, endpoint_b]))
-            flow_key = sorted_endpoints + (proto,)
-            
-            # Packet length / bytes
-            pkt_len = len(pkt)
-            pkt_time = float(pkt.time)
-            
-            if flow_key not in flows:
-                flows[flow_key] = {
-                    'start_time': pkt_time,
-                    'end_time': pkt_time,
-                    'initiator': endpoint_a, # The one who sent the first packet
-                    'responder': endpoint_b,
-                    'pkt_count_out': 1,
-                    'pkt_count_in': 0,
-                    'byte_count_out': pkt_len,
-                    'byte_count_in': 0,
-                    'tcp_flags_syn': syn_flag,
-                    'tcp_flags_ack': ack_flag,
-                    'tcp_flags_rst': rst_flag,
-                    'protocol': proto
-                }
-            else:
-                flow = flows[flow_key]
-                flow['end_time'] = pkt_time
-                
-                # Check direction relative to flow initiator
-                if endpoint_a == flow['initiator']:
-                    flow['pkt_count_out'] += 1
-                    flow['byte_count_out'] += pkt_len
-                else:
-                    flow['pkt_count_in'] += 1
-                    flow['byte_count_in'] += pkt_len
-                    
-                flow['tcp_flags_syn'] += syn_flag
-                flow['tcp_flags_ack'] += ack_flag
-                flow['tcp_flags_rst'] += rst_flag
 
         # 4. Compute Features for each Flow
         flow_list = []
